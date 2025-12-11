@@ -27,8 +27,8 @@ This app allows users to upload an image, apply a fully customizable text waterm
 
 ### 1. Clone the repository  
 ```bash
-git clone https://github.com/olatideenoch/Watermark_Generator_App.git
-cd Watermark_Generator_App
+git clone https://github.com/olatideenoch/watermark_app.git
+cd watermark_app
 ```
 ## Install dependencies
 ```bash
