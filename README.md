@@ -19,7 +19,7 @@ This app allows users to upload an image, apply a fully customizable text waterm
 ---
 
 ## 📸 Screenshot  
-![Watermark App Demo](./Demo/watermark_app_demo.jpg "Watermark App Interface" width="600")
+( /Demo/watermark_app_demo.jpg )
 
 ---
 
