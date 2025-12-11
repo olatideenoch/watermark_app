@@ -4,7 +4,7 @@ from PIL import Image, ImageTk, ImageDraw, ImageFont
 
 window = Tk()
 
-window.title("Watermark Generator App")
+window.title("Watermark App")
 window.minsize(width=500, height=800)
 window.config(padx= 50, pady= 20)
 
@@ -457,3 +457,4 @@ save_button = Button(text='Save Picture', command=save_img, width= 40)
 save_button.grid(column=1, row=14)
 
 window.mainloop()
+
