@@ -49,18 +49,18 @@ For macOS users, a commented-out macOS font map is included inside save_img() th
 
 ## 📝 Known Limitations
 
-• Watermark preview may not match exact pixel scaling (due to canvas resizing)
-• Rotated text might shift slightly depending on font metrics
-• Font availability depends on the OS
+- Watermark preview may not match exact pixel scaling (due to canvas resizing)
+- Rotated text might shift slightly depending on font metrics
+- Font availability depends on the OS
 
 ---
 
 ## 🤝 Contributions
 
 Pull requests are welcome!
-• Submit Pull Requests(PRs)
-• Report issues
-• Suggest new features
+- Submit Pull Requests(PRs)
+- Report issues
+- Suggest new features
 
 ---
 
