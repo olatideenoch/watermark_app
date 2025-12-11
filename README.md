@@ -40,14 +40,14 @@ python main.py
 ```
 ---
 
-##🖥️ Cross-Platform Font Support
+## 🖥️ Cross-Platform Font Support
 
 The project includes **Windows font paths** by default.
 For macOS users, a commented-out macOS font map is included inside save_img() they can simply uncomment it.
 
 ---
 
-##📝 Known Limitations
+## 📝 Known Limitations
 
 • Watermark preview may not match exact pixel scaling (due to canvas resizing)
 • Rotated text might shift slightly depending on font metrics
@@ -55,7 +55,7 @@ For macOS users, a commented-out macOS font map is included inside save_img() th
 
 ---
 
-##🤝 Contributions
+## 🤝 Contributions
 
 Pull requests are welcome!
 • Submit Pull Requests(PRs)
@@ -64,13 +64,13 @@ Pull requests are welcome!
 
 ---
 
-##📄 Licensing
+## 📄 Licensing
 
 The project is open-source under the MIT License
 
 ---
 
-##⭐ A Note from the Creator
+## ⭐ A Note from the Creator
 
 This Watermark App was built to combine simplicity with professional-level watermarking features — clean, intuitive, and effective.
 
