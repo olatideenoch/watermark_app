@@ -52,6 +52,7 @@ For macOS users, a commented-out macOS font map is included inside save_img() th
 - Watermark preview may not match exact pixel scaling (due to canvas resizing)
 - Rotated text might shift slightly depending on font metrics
 - Font availability depends on the OS
+- Transparency works in the saved image, but not in the canvas preview due to Tkinter’s lack of transparency support.
 
 ---
 
