@@ -190,184 +190,155 @@ def load_new_watermark():
 
 def save_img():
     global original_img, watermark_id
-    
+
     if original_img is None:
         messagebox.showwarning("No Image", "Please load an image first!")
         return
-    
-    transparency = transparency_spinbox.get().strip()
-    rotation = rotation_spinbox.get().strip()
 
+    # Read transparency + rotation
     try:
-        alpha = int(transparency)
-        angle = int(rotation)
+        alpha = int(transparency_spinbox.get().strip())
+        angle = int(rotation_spinbox.get().strip())
+        alpha = max(0, min(100, alpha))
+        angle = max(0, min(360, angle))
     except:
-        transparency = 100
+        alpha = 100
         angle = 0
 
-    if watermark_id is None:
-        response = messagebox.askyesno("No Watermark", "No watermark has been added. Save image without watermark?")
-        if not response:
-            return
-    
     save_path = filedialog.asksaveasfilename(
         defaultextension=".png",
-        filetypes=[("PNG Files", "*.png"), ("JPEG Files", "*.jpg *.jpeg"), ("All Files", "*.*")]
+        filetypes=[
+            ("PNG Files", "*.png"),
+            ("JPEG Files", "*.jpg *.jpeg"),
+            ("All Files", "*.*")
+        ]
     )
-    
     if not save_path:
         return
-    
+
+    # Copy original image
+    watermarked_img = original_img.copy()
+
+    if watermark_id is None:
+        watermarked_img.save(save_path)
+        messagebox.showinfo("Saved", "Image saved successfully!")
+        return
+
     try:
-        watermarked_img = original_img.copy()
-        
-        if watermark_id is not None:
-            # Get watermark properties
-            watermark_text = canvas.itemcget(watermark_id, 'text')
-            font_info = canvas.itemcget(watermark_id, 'font')
-            color = canvas.itemcget(watermark_id, 'fill')
-            coords = canvas.coords(watermark_id)
-            
-            # Parse font info
-            font_parts = font_info.split()
-            font_family = font_parts[0]
-            font_size = int(font_parts[1])
+        # ===== GET ATTRIBUTES FROM CANVAS =====
+        watermark_text = canvas.itemcget(watermark_id, "text")
+        font_info = canvas.itemcget(watermark_id, "font")
+        color_name = canvas.itemcget(watermark_id, "fill")
+        canvas_x, canvas_y = canvas.coords(watermark_id)
 
-            # Get font weight 
-            font_weight = ""
-            if len(font_parts) > 2:
-                font_weight = font_parts[2]
-            
-            # Prepare to draw
-            draw = ImageDraw.Draw(watermarked_img, 'RGBA')
-            
-            # load the font
-            try:
-                # FONT MAP – full Windows paths for Window Users
-                # Users can comment this if using Mac
-                font_map = {
-                    "Arial": r"C:\Windows\Fonts\arial.ttf",
-                    "Helvetica": r"C:\Windows\Fonts\arial.ttf",     # fallback
-                    "Times New Roman": r"C:\Windows\Fonts\times.ttf",
-                    "Courier": r"C:\Windows\Fonts\cour.ttf",
-                    "Courier New": r"C:\Windows\Fonts\cour.ttf",
-                    "Calibri": r"C:\Windows\Fonts\calibri.ttf",
-                    "Verdana": r"C:\Windows\Fonts\verdana.ttf",
-                    "Tahoma": r"C:\Windows\Fonts\tahoma.ttf",
-                    "Trebuchet MS": r"C:\Windows\Fonts\trebuc.ttf",
-                    "Comic Sans MS": r"C:\Windows\Fonts\comic.ttf",
-                    "Georgia": r"C:\Windows\Fonts\georgia.ttf",
-                    "Impact": r"C:\Windows\Fonts\impact.ttf",
-                    "Forte": r"C:\Windows\Fonts\forte.ttf",
-                    "Segoe UI": r"C:\Windows\Fonts\segoeui.ttf",
-                    "Consolas": r"C:\Windows\Fonts\consola.ttf",
-                    "Lucida Console": r"C:\Windows\Fonts\lucon.ttf"
-                }
-                
-                # macOS FONT MAP (Users can uncomment if using Mac)
-                # mac_font_map = {
-                #     "Arial": "/System/Library/Fonts/Supplemental/Arial.ttf",
-                #     "Helvetica": "/System/Library/Fonts/Helvetica.ttc",
-                #     "Times New Roman": "/System/Library/Fonts/Supplemental/Times New Roman.ttf",
-                #     "Courier": "/System/Library/Fonts/Courier.ttc",
-                #     "Courier New": "/System/Library/Fonts/Supplemental/Courier New.ttf",
-                #     "Calibri": "/System/Library/Fonts/Supplemental/Calibri.ttf",
-                #     "Verdana": "/System/Library/Fonts/Supplemental/Verdana.ttf",
-                #     "Tahoma": "/Library/Fonts/Tahoma.ttf",  # manually installed
-                #     "Trebuchet MS": "/Library/Fonts/Trebuchet MS.ttf",
-                #     "Comic Sans MS": "/Library/Fonts/Comic Sans MS.ttf",
-                #     "Georgia": "/System/Library/Fonts/Supplemental/Georgia.ttf",
-                #     "Impact": "/Library/Fonts/Impact.ttf",
-                #     "Forte": "/Library/Fonts/Forte.ttf",
-                #     "Segoe UI": "/Library/Fonts/Segoe UI.ttf",  # usually user-installed
-                #     "Consolas": "/Library/Fonts/Consolas.ttf",
-                #     "Lucida Console": "/System/Library/Fonts/LucidaGrande.ttc"  # closest match
-                # }
+        # Parse font info
+        font_parts = font_info.split()
+        font_family = font_parts[0]
+        canvas_font_size = int(font_parts[1])
+        font_weight = font_parts[2] if len(font_parts) > 2 else ""
 
+        # WINDOWS FONT MAP(comment if using macOS)
+        font_map = {
+            "Arial": r"C:\Windows\Fonts\arial",
+            "Helvetica": r"C:\Windows\Fonts\arial",
+            "Times New Roman": r"C:\Windows\Fonts\times",
+            "Courier": r"C:\Windows\Fonts\cour",
+            "Courier New": r"C:\Windows\Fonts\cour",
+            "Calibri": r"C:\Windows\Fonts\calibri",
+            "Verdana": r"C:\Windows\Fonts\verdana",
+            "Tahoma": r"C:\Windows\Fonts\tahoma",
+            "Trebuchet MS": r"C:\Windows\Fonts\trebuc",
+            "Comic Sans MS": r"C:\Windows\Fonts\comic",
+            "Georgia": r"C:\Windows\Fonts\georgia",
+            "Impact": r"C:\Windows\Fonts\impact",
+            "Forte": r"C:\Windows\Fonts\forte",
+            "Segoe UI": r"C:\Windows\Fonts\segoeui",
+            "Consolas": r"C:\Windows\Fonts\consola",
+            "Lucida Console": r"C:\Windows\Fonts\lucon"
+        }
 
-                system_font = font_map.get(font_family, "arial")
-                
-                if font_weight == "bold":
-                    font = ImageFont.truetype(f"{system_font}bd.ttf", font_size)
-                elif font_weight == "italic":
-                    font = ImageFont.truetype(f"{system_font}i.ttf", font_size)
+        # # macOS FONT MAP (uncomment if using macOS)
+        # mac_font_map = {        
+        #     "Arial": "/System/Library/Fonts/Supplemental/Arial",                # Arial.ttf
+        #     "Helvetica": "/System/Library/Fonts/Helvetica",                    # Helvetica.ttc
+        #     "Times New Roman": "/System/Library/Fonts/Supplemental/Times New Roman",  # Times New Roman.ttf
+        #     "Courier": "/System/Library/Fonts/Courier",                        # Courier.ttc
+        #     "Courier New": "/System/Library/Fonts/Supplemental/Courier New",   # Courier New.ttf
+        #     "Calibri": "/System/Library/Fonts/Supplemental/Calibri",          # Calibri.ttf (if installed)
+        #     "Verdana": "/System/Library/Fonts/Supplemental/Verdana",          # Verdana.ttf
+        #     "Tahoma": "/Library/Fonts/Tahoma",                                # may be user-installed
+        #     "Trebuchet MS": "/Library/Fonts/Trebuchet MS",                    # Trebuchet MS.ttf
+        #     "Comic Sans MS": "/Library/Fonts/Comic Sans MS",                  # Comic Sans MS.ttf
+        #     "Georgia": "/System/Library/Fonts/Supplemental/Georgia",          # Georgia.ttf
+        #     "Impact": "/Library/Fonts/Impact",                                # Impact.ttf (if installed)
+        #     "Forte": "/Library/Fonts/Forte",                                  # Forte.ttf (if installed)
+        #     "Segoe UI": "/Library/Fonts/Segoe UI",                            # typically user-installed (MS Office)
+        #     "Consolas": "/Library/Fonts/Consolas",                            # Consolas.ttf (if installed)
+        #     "Lucida Console": "/System/Library/Fonts/LucidaGrande"            # LucidaGrande.ttc
+        # }
+
+        # ===== SCALE FONT SIZE =====
+        img_w, img_h = watermarked_img.size
+        canvas_w = canvas.winfo_width()
+
+        scale = img_w / canvas_w
+        real_font_size = int(canvas_font_size * scale)
+
+        base = font_map.get(font_family)
+        try:
+            if base:
+                if font_weight.lower() == "bold":
+                    font = ImageFont.truetype(base + "bd.ttf", real_font_size)
+                elif font_weight.lower() == "italic":
+                    font = ImageFont.truetype(base + "i.ttf", real_font_size)
                 else:
-                    font = ImageFont.truetype(f"{system_font}.ttf", font_size)
-            except:
-                font = ImageFont.load_default()
-        
-            # Convert 0-100 to 0-255
-            transparency_value = max(0, min(255, int(alpha * 2.55)))
-            
-            # Convert color to RGBA with transparency
-            color_map = {
-                "black": (0, 0, 0, alpha),
-                "white": (255, 255, 255, alpha),
-                "red": (255, 0, 0, alpha),
-                "green": (0, 255, 0, alpha),
-                "blue": (0, 0, 255, alpha),
-                "cyan": (0, 255, 255, alpha),
-                "yellow": (255, 255, 0, alpha),
-                "magenta": (255, 0, 255, alpha),
-                "gray": (128, 128, 128, alpha),
-                "light gray": (211, 211, 211, alpha),
-                "dark gray": (169, 169, 169, alpha),
-                "orange": (255, 165, 0, alpha),
-                "pink": (255, 192, 203, alpha),
-                "purple": (128, 0, 128, alpha),
-                "brown": (165, 42, 42, alpha),
-                "gold": (255, 215, 0, alpha),
-                "silver": (192, 192, 192, alpha),
-                "navy": (0, 0, 128, alpha),
-                "sky blue": (135, 206, 235, alpha),
-                "lime": (0, 255, 0, alpha),
-                "teal": (0, 128, 128, alpha),
-                "maroon": (128, 0, 0, alpha),
-                "olive": (128, 128, 0, alpha),
-            }
-            
-            rgba_color = color_map.get(color.lower(), (transparency_value))
-            
-            # Scale coordinates from canvas to original image
-            img_width, img_height = watermarked_img.size
-            canvas_x, canvas_y = coords
-            canvas_width = canvas.winfo_width()
-            canvas_height = canvas.winfo_height()
-            scale_x = img_width / canvas_width
-            scale_y = img_height / canvas_height
-            x = canvas_x * scale_x
-            y = canvas_y * scale_y
-            
-            # Get text dimensions
-            try:
-                # Create a temporary image to measure text
-                temp_img = Image.new('RGBA', (1, 1))
-                temp_draw = ImageDraw.Draw(temp_img)
-                text_bbox = temp_draw.textbbox((0, 0), watermark_text, font=font)
-                text_width = text_bbox[2] - text_bbox[0]
-                text_height = text_bbox[3] - text_bbox[1]
-            except:
-                text_width = font_size * len(watermark_text) * 0.6
-                text_height = font_size
-            
-            # Handle rotation
-            if angle != 0:
-                text_layer = Image.new('RGBA', (int(text_width * 1.5), int(text_height * 1.5)), (0, 0, 0, 0))
-                text_draw = ImageDraw.Draw(text_layer)
-                text_draw.text((text_width * 0.25, text_height * 0.25), watermark_text, font=font, fill=rgba_color)
-                
-                rotated_text = text_layer.rotate(angle, expand=True, fillcolor=(0, 0, 0, 0))
-                
-                # Calculate position for rotated text
-                rot_width, rot_height = rotated_text.size
-                paste_x = int(x - rot_width / 2)
-                paste_y = int(y - rot_height / 2)
-                
-                # Paste rotated text onto the image
-                watermarked_img.paste(rotated_text, (paste_x, paste_y), rotated_text)
+                    font = ImageFont.truetype(base + ".ttf", real_font_size)
             else:
-                # Draw text without rotation
-                draw.text((x, y), watermark_text, font=font, fill=rgba_color, anchor="mm")
+                font = ImageFont.load_default()
+        except:
+            font = ImageFont.load_default()
+
+        # Convert transparency
+        alpha_255 = int(alpha * 2.55)
+
+        color_map = {
+            "black": (0, 0, 0, alpha_255),
+            "white": (255, 255, 255, alpha_255),
+            "red": (255, 0, 0, alpha_255),
+            "green": (0, 255, 0, alpha_255),
+            "blue": (0, 0, 255, alpha_255),
+            "yellow": (255, 255, 0, alpha_255),
+            "magenta": (255, 0, 255, alpha_255),
+            "cyan": (0, 255, 255, alpha_255),
+            "gray": (128, 128, 128, alpha_255),
+            "orange": (255, 165, 0, alpha_255),
+            "pink": (255, 192, 203, alpha_255),
+            "purple": (128, 0, 128, alpha_255),
+            "navy": (0, 0, 128, alpha_255),
+        }
+        rgba_color = color_map.get(color_name.lower(), (255, 255, 255, alpha_255))
+
+        # ===== SCALE WATERMARK POSITION =====
+        scale_x = img_w / canvas.winfo_width()
+        scale_y = img_h / canvas.winfo_height()
+        x = canvas_x * scale_x
+        y = canvas_y * scale_y
+
+        draw = ImageDraw.Draw(watermarked_img, "RGBA")
+
+        # ===== ROTATION HANDLING =====
+        if angle != 0:
+            temp = Image.new("RGBA", (img_w, int(img_h * 0.2)), (0, 0, 0, 0))
+            temp_draw = ImageDraw.Draw(temp)
+            temp_draw.text((50, 50), watermark_text, font=font, fill=rgba_color)
+
+            rotated = temp.rotate(angle, expand=True)
+            w, h = rotated.size
+
+            watermarked_img.paste(rotated, (int(x - w / 2), int(y - h / 2)), rotated)
+
+        else:
+            draw.text((x, y), watermark_text, font=font, fill=rgba_color, anchor="mm")
         
         # Save the image
         watermarked_img.save(save_path)
@@ -457,4 +428,5 @@ save_button = Button(text='Save Picture', command=save_img, width= 40)
 save_button.grid(column=1, row=14)
 
 window.mainloop()
+
 
